@@ -26,8 +26,14 @@ import io.github.muntashirakon.crypto.ed25519.Utils;
 
 @SuppressWarnings("unused")
 public class Spake2Context implements Destroyable {
-    public static final int MAX_MSG_SIZE = 32; // bytes
-    public static final int MAX_KEY_SIZE = 64; // bytes
+    /**
+     * Maximum message size in bytes
+     */
+    public static final int MAX_MSG_SIZE = 32;
+    /**
+     * Maximum key size in bytes
+     */
+    public static final int MAX_KEY_SIZE = 64;
 
     private static final byte[][] helperTable = new byte[][]{
             Utils.hexToBytes("0100000000000000000000000000000000000000000000000000000000000000"),
@@ -111,18 +117,17 @@ public class Spake2Context implements Destroyable {
     private static final String SEED_N = "edwards25519 point generation seed (N)";
     private static final String SEED_M = "edwards25519 point generation seed (M)";
 
-    public static GroupElement[] SPAKE_N_SMALL_PRECOMP;
-    public static GroupElement[] SPAKE_M_SMALL_PRECOMP;
+    private static final GroupElement[] SPAKE_N_SMALL_PRECOMP;
+    private static final GroupElement[] SPAKE_M_SMALL_PRECOMP;
 
     static {
         SPAKE_N_SMALL_PRECOMP = precomputeTable(SEED_N);
         SPAKE_M_SMALL_PRECOMP = precomputeTable(SEED_M);
     }
 
-    public final byte[] myName;
-    public final byte[] theirName;
-    public final Spake2Role myRole;
-
+    private final byte[] myName;
+    private final byte[] theirName;
+    private final Spake2Role myRole;
     private final byte[] privateKey = new byte[32];
     private final byte[] myMsg = new byte[32];
     private final byte[] passwordScalar = new byte[32];
@@ -187,6 +192,7 @@ public class Spake2Context implements Destroyable {
 
     /**
      * @return A message of size {@link #MAX_MSG_SIZE}.
+     * @param password Shared password.
      * @throws IllegalArgumentException If SHA-512 is unavailable for some reason.
      * @throws IllegalStateException    If the message has already been generated.
      */
@@ -266,6 +272,7 @@ public class Spake2Context implements Destroyable {
 
     /**
      * @return Key of size {@link #MAX_KEY_SIZE}.
+     * @param theirMsg Message generated/received from the other end.
      * @throws IllegalArgumentException If the message is invalid or SHA-512 is unavailable for some reason.
      * @throws IllegalStateException    If the key has already been generated.
      */

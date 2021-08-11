@@ -40,4 +40,4 @@ Java implementation too.
 ## License
 Copyright 2021 Muntashir Al-Islam
 
-Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
+Licensed under the GPLv3: https://www.gnu.org/licenses/gpl-3.0.html
