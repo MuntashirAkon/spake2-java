@@ -1,0 +1,29 @@
+/*
+ * Copyright (C) 2021 Muntashir Al-Islam
+ *
+ * Licensed according to the LICENSE file in this repository.
+ */
+
+apply plugin: 'java-library'
+
+repositories {
+    mavenCentral()
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+jar {
+    archiveBaseName = 'spake2'
+    archiveVersion =  '0.0.9'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
