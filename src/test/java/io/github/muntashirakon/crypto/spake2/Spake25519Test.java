@@ -8,15 +8,97 @@ package io.github.muntashirakon.crypto.spake2;
 
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import io.github.muntashirakon.crypto.ed25519.Curve;
+import io.github.muntashirakon.crypto.ed25519.Ed25519;
+import io.github.muntashirakon.crypto.ed25519.Ed25519CurveParameterSpec;
+import io.github.muntashirakon.crypto.ed25519.Ed25519Field;
+import io.github.muntashirakon.crypto.ed25519.FieldElement;
+import io.github.muntashirakon.crypto.ed25519.GroupElement;
 import io.github.muntashirakon.crypto.ed25519.Utils;
 
 import static org.junit.Assert.*;
 
 public class Spake25519Test {
     private static final byte[] B_EIGHT = Utils.hexToBytes("0800000000000000000000000000000000000000000000000000000000000000");
+
+    // Based on http://ed25519.cr.yp.to/python/ed25519.py
+    private static GroupElement ed25519Edwards(GroupElement P, GroupElement Q) {
+        Curve curve = P.getCurve();
+        Ed25519Field field = curve.getField();
+        FieldElement x1 = P.getX();
+        FieldElement y1 = P.getY();
+        FieldElement x2 = Q.getX();
+        FieldElement y2 = Q.getY();
+        FieldElement dx1x2y1y2 = curve.getD().multiply(x1).multiply(x2).multiply(y1).multiply(y2);
+        FieldElement x3 = x1.multiply(y2).add(x2.multiply(y1)).multiply(dx1x2y1y2.addOne().invert());  // (x1*y2+x2*y1) * inv(1+d*x1*x2*y1*y2)
+        FieldElement y3 = y1.multiply(y2).add(x1.multiply(x2)).multiply(field.ONE.subtract(dx1x2y1y2).invert()); // (y1*y2+x1*x2) * inv(1-d*x1*x2*y1*y2)
+        return GroupElement.p3(curve, x3, y3, field.ZERO, field.ZERO);
+    }
+
+    private static GroupElement ed25519ScalarMultiply(GroupElement P, BigInteger e) {
+        GroupElement Q = P.getCurve().getZero(GroupElement.Representation.P3);
+        Q = ed25519Edwards(Q, Q);
+        Q = ed25519Edwards(Q, P);
+
+        int len = e.bitLength() - 2;
+        for (int c = len; c >= 0; --c) {
+            Q = ed25519Edwards(Q, Q);
+            if (e.testBit(c)) Q = ed25519Edwards(Q, P);
+        }
+        return Q;
+    }
+
+    static GroupElement[] precomputeTable(String seed) {
+        GroupElement[] t = new GroupElement[15];
+        byte[] seedBytes = seed.getBytes(StandardCharsets.UTF_8);
+        byte[] v = Spake2Context.getHash("SHA-256", seedBytes);
+        Ed25519CurveParameterSpec spec = Ed25519.getSpec();
+        GroupElement P = spec.getCurve().createPoint(v, true);
+        Curve curve = P.getCurve();
+        for (int i = 1; i < 16; ++i) {
+            // (i >>> 3 & 1) * (1 << 192)
+            BigInteger t1 = BigInteger.valueOf((i >>> 3 & 1)).multiply(BigInteger.ONE.shiftLeft(192));
+            // (i >>> 2 & 1) * (1 << 128)
+            BigInteger t2 = BigInteger.valueOf((i >>> 2 & 1)).multiply(BigInteger.ONE.shiftLeft(128));
+            // (i >>> 1 & 1) * (1 <<  64)
+            BigInteger t3 = BigInteger.valueOf((i >>> 1 & 1)).multiply(BigInteger.ONE.shiftLeft(64));
+            // (i & 1)
+            BigInteger t4 = BigInteger.ZERO.add(BigInteger.valueOf(i & 1));
+            // k is the sum of all the above
+            BigInteger k = BigInteger.ZERO.add(t1).add(t2).add(t3).add(t4);
+
+            GroupElement ge = ed25519ScalarMultiply(P, k);
+            FieldElement x = ge.getX();
+            FieldElement y = ge.getY();
+
+            FieldElement ypx = y.add(x);
+            FieldElement ymx = y.subtract(x);
+            FieldElement xy2d = x.multiply(y).multiply(curve.get2D());
+
+            t[i - 1] = GroupElement.precomp(curve, ypx, ymx, xy2d);
+        }
+        return t;
+    }
+
+    private static byte[] printPrecompTable(GroupElement[] groupElements, String name) {
+        byte[] table = new byte[groupElements.length * 3 * 32];
+        for (int i = 0; i < groupElements.length; ++i) {
+            System.arraycopy(groupElements[i].getX().toByteArray(), 0, table, i * 96, 32);
+            System.arraycopy(groupElements[i].getY().toByteArray(), 0, table, i * 96 + 32, 32);
+            System.arraycopy(groupElements[i].getZ().toByteArray(), 0, table, i * 96 + 64, 32);
+        }
+        System.out.printf("    private static final int[] %s = new int[] {", name);
+        for (int i = 0; i < table.length; ++i) {
+            if (i % 15 == 0) System.out.printf("%n            ");
+            System.out.printf(" 0x%02X,", table[i]);
+        }
+        System.out.println("\n    };");
+        return table;
+    }
 
     @Test
     public void scalarTestCmov() {
@@ -90,6 +172,18 @@ public class Spake25519Test {
                 Utils.bytesToHex(eight.add(scalar).getBytes()));
         assertEquals("daa7ebb934c624b0ac39ef45bdf3bd2900000000000000000000000000000020",
                 Utils.bytesToHex(scalar.add(scalar).getBytes()));
+    }
+
+    @Test
+    public void checkIfGeneratedValuesAreSameForN() {
+        GroupElement[] ge = precomputeTable("edwards25519 point generation seed (N)");
+        assertArrayEquals(ge, Spake2Context.SPAKE_N_SMALL_PRECOMP);
+    }
+
+    @Test
+    public void checkIfGeneratedValuesAreSameForM() {
+        GroupElement[] ge = precomputeTable("edwards25519 point generation seed (M)");
+        assertArrayEquals(ge, Spake2Context.SPAKE_M_SMALL_PRECOMP);
     }
 
     @Test
