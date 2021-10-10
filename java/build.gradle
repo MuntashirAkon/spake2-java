@@ -1,0 +1,56 @@
+/*
+ * Copyright (C) 2021 Muntashir Al-Islam
+ *
+ * Licensed according to the LICENSE file in this repository.
+ */
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'io.github.muntashirakon'
+version = '0.9.0'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            pom {
+                name = 'SPAKE2-Java'
+                description = 'Implementation of SPAKE2 protocol in Java, fully compatible with BoringSSL.'
+                url = 'https://github.com/MuntashirAkon/spake2-java'
+                licenses {
+                    license {
+                        name = 'GNU General Public License, Version 3.0 or later'
+                        url = 'https://www.gnu.org/licenses/gpl-3.0.txt'
+                    }
+                }
+            }
+        }
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+javadoc {
+    exclude 'io/github/muntashirakon/crypto/ed25519/**'
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}

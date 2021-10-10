@@ -168,215 +168,312 @@ public class Ed25519FieldElement extends FieldElement {
      */
     public FieldElement multiply(FieldElement val) {
         int[] g = ((Ed25519FieldElement)val).t;
-        int g1_19 = 19 * g[1]; /* 1.959375*2^29 */
-        int g2_19 = 19 * g[2]; /* 1.959375*2^30; still ok */
-        int g3_19 = 19 * g[3];
-        int g4_19 = 19 * g[4];
-        int g5_19 = 19 * g[5];
-        int g6_19 = 19 * g[6];
-        int g7_19 = 19 * g[7];
-        int g8_19 = 19 * g[8];
-        int g9_19 = 19 * g[9];
-        int f1_2 = 2 * t[1];
-        int f3_2 = 2 * t[3];
-        int f5_2 = 2 * t[5];
-        int f7_2 = 2 * t[7];
-        int f9_2 = 2 * t[9];
-        long f0g0    = t[0] * (long) g[0];
-        long f0g1    = t[0] * (long) g[1];
-        long f0g2    = t[0] * (long) g[2];
-        long f0g3    = t[0] * (long) g[3];
-        long f0g4    = t[0] * (long) g[4];
-        long f0g5    = t[0] * (long) g[5];
-        long f0g6    = t[0] * (long) g[6];
-        long f0g7    = t[0] * (long) g[7];
-        long f0g8    = t[0] * (long) g[8];
-        long f0g9    = t[0] * (long) g[9];
-        long f1g0    = t[1] * (long) g[0];
-        long f1g1_2  = f1_2 * (long) g[1];
-        long f1g2    = t[1] * (long) g[2];
-        long f1g3_2  = f1_2 * (long) g[3];
-        long f1g4    = t[1] * (long) g[4];
-        long f1g5_2  = f1_2 * (long) g[5];
-        long f1g6    = t[1] * (long) g[6];
-        long f1g7_2  = f1_2 * (long) g[7];
-        long f1g8    = t[1] * (long) g[8];
-        long f1g9_38 = f1_2 * (long) g9_19;
-        long f2g0    = t[2] * (long) g[0];
-        long f2g1    = t[2] * (long) g[1];
-        long f2g2    = t[2] * (long) g[2];
-        long f2g3    = t[2] * (long) g[3];
-        long f2g4    = t[2] * (long) g[4];
-        long f2g5    = t[2] * (long) g[5];
-        long f2g6    = t[2] * (long) g[6];
-        long f2g7    = t[2] * (long) g[7];
-        long f2g8_19 = t[2] * (long) g8_19;
-        long f2g9_19 = t[2] * (long) g9_19;
-        long f3g0    = t[3] * (long) g[0];
-        long f3g1_2  = f3_2 * (long) g[1];
-        long f3g2    = t[3] * (long) g[2];
-        long f3g3_2  = f3_2 * (long) g[3];
-        long f3g4    = t[3] * (long) g[4];
-        long f3g5_2  = f3_2 * (long) g[5];
-        long f3g6    = t[3] * (long) g[6];
-        long f3g7_38 = f3_2 * (long) g7_19;
-        long f3g8_19 = t[3] * (long) g8_19;
-        long f3g9_38 = f3_2 * (long) g9_19;
-        long f4g0    = t[4] * (long) g[0];
-        long f4g1    = t[4] * (long) g[1];
-        long f4g2    = t[4] * (long) g[2];
-        long f4g3    = t[4] * (long) g[3];
-        long f4g4    = t[4] * (long) g[4];
-        long f4g5    = t[4] * (long) g[5];
-        long f4g6_19 = t[4] * (long) g6_19;
-        long f4g7_19 = t[4] * (long) g7_19;
-        long f4g8_19 = t[4] * (long) g8_19;
-        long f4g9_19 = t[4] * (long) g9_19;
-        long f5g0    = t[5] * (long) g[0];
-        long f5g1_2  = f5_2 * (long) g[1];
-        long f5g2    = t[5] * (long) g[2];
-        long f5g3_2  = f5_2 * (long) g[3];
-        long f5g4    = t[5] * (long) g[4];
-        long f5g5_38 = f5_2 * (long) g5_19;
-        long f5g6_19 = t[5] * (long) g6_19;
-        long f5g7_38 = f5_2 * (long) g7_19;
-        long f5g8_19 = t[5] * (long) g8_19;
-        long f5g9_38 = f5_2 * (long) g9_19;
-        long f6g0    = t[6] * (long) g[0];
-        long f6g1    = t[6] * (long) g[1];
-        long f6g2    = t[6] * (long) g[2];
-        long f6g3    = t[6] * (long) g[3];
-        long f6g4_19 = t[6] * (long) g4_19;
-        long f6g5_19 = t[6] * (long) g5_19;
-        long f6g6_19 = t[6] * (long) g6_19;
-        long f6g7_19 = t[6] * (long) g7_19;
-        long f6g8_19 = t[6] * (long) g8_19;
-        long f6g9_19 = t[6] * (long) g9_19;
-        long f7g0    = t[7] * (long) g[0];
-        long f7g1_2  = f7_2 * (long) g[1];
-        long f7g2    = t[7] * (long) g[2];
-        long f7g3_38 = f7_2 * (long) g3_19;
-        long f7g4_19 = t[7] * (long) g4_19;
-        long f7g5_38 = f7_2 * (long) g5_19;
-        long f7g6_19 = t[7] * (long) g6_19;
-        long f7g7_38 = f7_2 * (long) g7_19;
-        long f7g8_19 = t[7] * (long) g8_19;
-        long f7g9_38 = f7_2 * (long) g9_19;
-        long f8g0    = t[8] * (long) g[0];
-        long f8g1    = t[8] * (long) g[1];
-        long f8g2_19 = t[8] * (long) g2_19;
-        long f8g3_19 = t[8] * (long) g3_19;
-        long f8g4_19 = t[8] * (long) g4_19;
-        long f8g5_19 = t[8] * (long) g5_19;
-        long f8g6_19 = t[8] * (long) g6_19;
-        long f8g7_19 = t[8] * (long) g7_19;
-        long f8g8_19 = t[8] * (long) g8_19;
-        long f8g9_19 = t[8] * (long) g9_19;
-        long f9g0    = t[9] * (long) g[0];
-        long f9g1_38 = f9_2 * (long) g1_19;
-        long f9g2_19 = t[9] * (long) g2_19;
-        long f9g3_38 = f9_2 * (long) g3_19;
-        long f9g4_19 = t[9] * (long) g4_19;
-        long f9g5_38 = f9_2 * (long) g5_19;
-        long f9g6_19 = t[9] * (long) g6_19;
-        long f9g7_38 = f9_2 * (long) g7_19;
-        long f9g8_19 = t[9] * (long) g8_19;
-        long f9g9_38 = f9_2 * (long) g9_19;
-
-        /**
-         * Remember: 2^255 congruent 19 modulo p.
-         * h = h0 * 2^0 + h1 * 2^26 + h2 * 2^(26+25) + h3 * 2^(26+25+26) + ... + h9 * 2^(5*26+5*25).
-         * So to get the real number we would have to multiply the coefficients with the corresponding powers of 2.
-         * To get an idea what is going on below, look at the calculation of h0:
-         * h0 is the coefficient to the power 2^0 so it collects (sums) all products that have the power 2^0.
-         * f0 * g0 really is f0 * 2^0 * g0 * 2^0 = (f0 * g0) * 2^0.
-         * f1 * g9 really is f1 * 2^26 * g9 * 2^230 = f1 * g9 * 2^256 = 2 * f1 * g9 * 2^255 congruent 2 * 19 * f1 * g9 * 2^0 modulo p.
-         * f2 * g8 really is f2 * 2^51 * g8 * 2^204 = f2 * g8 * 2^255 congruent 19 * f2 * g8 * 2^0 modulo p.
-         * and so on...
-         */
-        long h0 = f0g0 + f1g9_38 + f2g8_19 + f3g7_38 + f4g6_19 + f5g5_38 + f6g4_19 + f7g3_38 + f8g2_19 + f9g1_38;
-        long h1 = f0g1 + f1g0    + f2g9_19 + f3g8_19 + f4g7_19 + f5g6_19 + f6g5_19 + f7g4_19 + f8g3_19 + f9g2_19;
-        long h2 = f0g2 + f1g1_2  + f2g0    + f3g9_38 + f4g8_19 + f5g7_38 + f6g6_19 + f7g5_38 + f8g4_19 + f9g3_38;
-        long h3 = f0g3 + f1g2    + f2g1    + f3g0    + f4g9_19 + f5g8_19 + f6g7_19 + f7g6_19 + f8g5_19 + f9g4_19;
-        long h4 = f0g4 + f1g3_2  + f2g2    + f3g1_2  + f4g0    + f5g9_38 + f6g8_19 + f7g7_38 + f8g6_19 + f9g5_38;
-        long h5 = f0g5 + f1g4    + f2g3    + f3g2    + f4g1    + f5g0    + f6g9_19 + f7g8_19 + f8g7_19 + f9g6_19;
-        long h6 = f0g6 + f1g5_2  + f2g4    + f3g3_2  + f4g2    + f5g1_2  + f6g0    + f7g9_38 + f8g8_19 + f9g7_38;
-        long h7 = f0g7 + f1g6    + f2g5    + f3g4    + f4g3    + f5g2    + f6g1    + f7g0    + f8g9_19 + f9g8_19;
-        long h8 = f0g8 + f1g7_2  + f2g6    + f3g5_2  + f4g4    + f5g3_2  + f6g2    + f7g1_2  + f8g0    + f9g9_38;
-        long h9 = f0g9 + f1g8    + f2g7    + f3g6    + f4g5    + f5g4    + f6g3    + f7g2    + f8g1    + f9g0;
-        long carry0;
-        long carry1;
-        long carry2;
-        long carry3;
-        long carry4;
-        long carry5;
-        long carry6;
-        long carry7;
-        long carry8;
-        long carry9;
-
-        /*
-        |h0| <= (1.65*1.65*2^52*(1+19+19+19+19)+1.65*1.65*2^50*(38+38+38+38+38))
-          i.e. |h0| <= 1.4*2^60; narrower ranges for h2, h4, h6, h8
-        |h1| <= (1.65*1.65*2^51*(1+1+19+19+19+19+19+19+19+19))
-          i.e. |h1| <= 1.7*2^59; narrower ranges for h3, h5, h7, h9
-        */
-
-        carry0 = (h0 + (long) (1<<25)) >> 26; h1 += carry0; h0 -= carry0 << 26;
-        carry4 = (h4 + (long) (1<<25)) >> 26; h5 += carry4; h4 -= carry4 << 26;
-        /* |h0| <= 2^25 */
-        /* |h4| <= 2^25 */
-        /* |h1| <= 1.71*2^59 */
-        /* |h5| <= 1.71*2^59 */
-
-        carry1 = (h1 + (long) (1<<24)) >> 25; h2 += carry1; h1 -= carry1 << 25;
-        carry5 = (h5 + (long) (1<<24)) >> 25; h6 += carry5; h5 -= carry5 << 25;
-        /* |h1| <= 2^24; from now on fits into int32 */
-        /* |h5| <= 2^24; from now on fits into int32 */
-        /* |h2| <= 1.41*2^60 */
-        /* |h6| <= 1.41*2^60 */
-
-        carry2 = (h2 + (long) (1<<25)) >> 26; h3 += carry2; h2 -= carry2 << 26;
-        carry6 = (h6 + (long) (1<<25)) >> 26; h7 += carry6; h6 -= carry6 << 26;
-        /* |h2| <= 2^25; from now on fits into int32 unchanged */
-        /* |h6| <= 2^25; from now on fits into int32 unchanged */
-        /* |h3| <= 1.71*2^59 */
-        /* |h7| <= 1.71*2^59 */
-
-        carry3 = (h3 + (long) (1<<24)) >> 25; h4 += carry3; h3 -= carry3 << 25;
-        carry7 = (h7 + (long) (1<<24)) >> 25; h8 += carry7; h7 -= carry7 << 25;
-        /* |h3| <= 2^24; from now on fits into int32 unchanged */
-        /* |h7| <= 2^24; from now on fits into int32 unchanged */
-        /* |h4| <= 1.72*2^34 */
-        /* |h8| <= 1.41*2^60 */
-
-        carry4 = (h4 + (long) (1<<25)) >> 26; h5 += carry4; h4 -= carry4 << 26;
-        carry8 = (h8 + (long) (1<<25)) >> 26; h9 += carry8; h8 -= carry8 << 26;
-        /* |h4| <= 2^25; from now on fits into int32 unchanged */
-        /* |h8| <= 2^25; from now on fits into int32 unchanged */
-        /* |h5| <= 1.01*2^24 */
-        /* |h9| <= 1.71*2^59 */
-
-        carry9 = (h9 + (long) (1<<24)) >> 25; h0 += carry9 * 19; h9 -= carry9 << 25;
-        /* |h9| <= 2^24; from now on fits into int32 unchanged */
-        /* |h0| <= 1.1*2^39 */
-
-        carry0 = (h0 + (long) (1<<25)) >> 26; h1 += carry0; h0 -= carry0 << 26;
-        /* |h0| <= 2^25; from now on fits into int32 unchanged */
-        /* |h1| <= 1.01*2^24 */
-
-        int[] h = new int[10];
-        h[0] = (int) h0;
-        h[1] = (int) h1;
-        h[2] = (int) h2;
-        h[3] = (int) h3;
-        h[4] = (int) h4;
-        h[5] = (int) h5;
-        h[6] = (int) h6;
-        h[7] = (int) h7;
-        h[8] = (int) h8;
-        h[9] = (int) h9;
-        return new Ed25519FieldElement(f, h);
+        long x1;
+        long x2;
+        long x3;
+        long x4;
+        long x5;
+        long x6;
+        long x7;
+        long x8;
+        long x9;
+        long x10;
+        long x11;
+        long x12;
+        long x13;
+        long x14;
+        long x15;
+        long x16;
+        long x17;
+        long x18;
+        long x19;
+        long x20;
+        long x21;
+        long x22;
+        long x23;
+        long x24;
+        long x25;
+        long x26;
+        long x27;
+        long x28;
+        long x29;
+        long x30;
+        long x31;
+        long x32;
+        long x33;
+        long x34;
+        long x35;
+        long x36;
+        long x37;
+        long x38;
+        long x39;
+        long x40;
+        long x41;
+        long x42;
+        long x43;
+        long x44;
+        long x45;
+        long x46;
+        long x47;
+        long x48;
+        long x49;
+        long x50;
+        long x51;
+        long x52;
+        long x53;
+        long x54;
+        long x55;
+        long x56;
+        long x57;
+        long x58;
+        long x59;
+        long x60;
+        long x61;
+        long x62;
+        long x63;
+        long x64;
+        long x65;
+        long x66;
+        long x67;
+        long x68;
+        long x69;
+        long x70;
+        long x71;
+        long x72;
+        long x73;
+        long x74;
+        long x75;
+        long x76;
+        long x77;
+        long x78;
+        long x79;
+        long x80;
+        long x81;
+        long x82;
+        long x83;
+        long x84;
+        long x85;
+        long x86;
+        long x87;
+        long x88;
+        long x89;
+        long x90;
+        long x91;
+        long x92;
+        long x93;
+        long x94;
+        long x95;
+        long x96;
+        long x97;
+        long x98;
+        long x99;
+        long x100;
+        long x101;
+        long x102;
+        int x103;
+        long x104;
+        long x105;
+        long x106;
+        long x107;
+        long x108;
+        long x109;
+        long x110;
+        long x111;
+        long x112;
+        long x113;
+        long x114;
+        int x115;
+        long x116;
+        long x117;
+        int x118;
+        long x119;
+        long x120;
+        int x121;
+        long x122;
+        long x123;
+        int x124;
+        long x125;
+        long x126;
+        int x127;
+        long x128;
+        long x129;
+        int x130;
+        long x131;
+        long x132;
+        int x133;
+        long x134;
+        long x135;
+        int x136;
+        long x137;
+        long x138;
+        int x139;
+        long x140;
+        long x141;
+        int x142;
+        int x143;
+        int x144;
+        byte x145;
+        int x146;
+        int x147;
+        x1 = ((long)(t[9]) * ((g[9]) * (byte) 0x26));
+        x2 = ((long)(t[9]) * ((g[8]) * (byte) 0x13));
+        x3 = ((long)(t[9]) * ((g[7]) * (byte) 0x26));
+        x4 = ((long)(t[9]) * ((g[6]) * (byte) 0x13));
+        x5 = ((long)(t[9]) * ((g[5]) * (byte) 0x26));
+        x6 = ((long)(t[9]) * ((g[4]) * (byte) 0x13));
+        x7 = ((long)(t[9]) * ((g[3]) * (byte) 0x26));
+        x8 = ((long)(t[9]) * ((g[2]) * (byte) 0x13));
+        x9 = ((long)(t[9]) * ((g[1]) * (byte) 0x26));
+        x10 = ((long)(t[8]) * ((g[9]) * (byte) 0x13));
+        x11 = ((long)(t[8]) * ((g[8]) * (byte) 0x13));
+        x12 = ((long)(t[8]) * ((g[7]) * (byte) 0x13));
+        x13 = ((long)(t[8]) * ((g[6]) * (byte) 0x13));
+        x14 = ((long)(t[8]) * ((g[5]) * (byte) 0x13));
+        x15 = ((long)(t[8]) * ((g[4]) * (byte) 0x13));
+        x16 = ((long)(t[8]) * ((g[3]) * (byte) 0x13));
+        x17 = ((long)(t[8]) * ((g[2]) * (byte) 0x13));
+        x18 = ((long)(t[7]) * ((g[9]) * (byte) 0x26));
+        x19 = ((long)(t[7]) * ((g[8]) * (byte) 0x13));
+        x20 = ((long)(t[7]) * ((g[7]) * (byte) 0x26));
+        x21 = ((long)(t[7]) * ((g[6]) * (byte) 0x13));
+        x22 = ((long)(t[7]) * ((g[5]) * (byte) 0x26));
+        x23 = ((long)(t[7]) * ((g[4]) * (byte) 0x13));
+        x24 = ((long)(t[7]) * ((g[3]) * (byte) 0x26));
+        x25 = ((long)(t[6]) * ((g[9]) * (byte) 0x13));
+        x26 = ((long)(t[6]) * ((g[8]) * (byte) 0x13));
+        x27 = ((long)(t[6]) * ((g[7]) * (byte) 0x13));
+        x28 = ((long)(t[6]) * ((g[6]) * (byte) 0x13));
+        x29 = ((long)(t[6]) * ((g[5]) * (byte) 0x13));
+        x30 = ((long)(t[6]) * ((g[4]) * (byte) 0x13));
+        x31 = ((long)(t[5]) * ((g[9]) * (byte) 0x26));
+        x32 = ((long)(t[5]) * ((g[8]) * (byte) 0x13));
+        x33 = ((long)(t[5]) * ((g[7]) * (byte) 0x26));
+        x34 = ((long)(t[5]) * ((g[6]) * (byte) 0x13));
+        x35 = ((long)(t[5]) * ((g[5]) * (byte) 0x26));
+        x36 = ((long)(t[4]) * ((g[9]) * (byte) 0x13));
+        x37 = ((long)(t[4]) * ((g[8]) * (byte) 0x13));
+        x38 = ((long)(t[4]) * ((g[7]) * (byte) 0x13));
+        x39 = ((long)(t[4]) * ((g[6]) * (byte) 0x13));
+        x40 = ((long)(t[3]) * ((g[9]) * (byte) 0x26));
+        x41 = ((long)(t[3]) * ((g[8]) * (byte) 0x13));
+        x42 = ((long)(t[3]) * ((g[7]) * (byte) 0x26));
+        x43 = ((long)(t[2]) * ((g[9]) * (byte) 0x13));
+        x44 = ((long)(t[2]) * ((g[8]) * (byte) 0x13));
+        x45 = ((long)(t[1]) * ((g[9]) * (byte) 0x26));
+        x46 = ((long)(t[9]) * (g[0]));
+        x47 = ((long)(t[8]) * (g[1]));
+        x48 = ((long)(t[8]) * (g[0]));
+        x49 = ((long)(t[7]) * (g[2]));
+        x50 = ((long)(t[7]) * ((g[1]) * 0x2));
+        x51 = ((long)(t[7]) * (g[0]));
+        x52 = ((long)(t[6]) * (g[3]));
+        x53 = ((long)(t[6]) * (g[2]));
+        x54 = ((long)(t[6]) * (g[1]));
+        x55 = ((long)(t[6]) * (g[0]));
+        x56 = ((long)(t[5]) * (g[4]));
+        x57 = ((long)(t[5]) * ((g[3]) * 0x2));
+        x58 = ((long)(t[5]) * (g[2]));
+        x59 = ((long)(t[5]) * ((g[1]) * 0x2));
+        x60 = ((long)(t[5]) * (g[0]));
+        x61 = ((long)(t[4]) * (g[5]));
+        x62 = ((long)(t[4]) * (g[4]));
+        x63 = ((long)(t[4]) * (g[3]));
+        x64 = ((long)(t[4]) * (g[2]));
+        x65 = ((long)(t[4]) * (g[1]));
+        x66 = ((long)(t[4]) * (g[0]));
+        x67 = ((long)(t[3]) * (g[6]));
+        x68 = ((long)(t[3]) * ((g[5]) * 0x2));
+        x69 = ((long)(t[3]) * (g[4]));
+        x70 = ((long)(t[3]) * ((g[3]) * 0x2));
+        x71 = ((long)(t[3]) * (g[2]));
+        x72 = ((long)(t[3]) * ((g[1]) * 0x2));
+        x73 = ((long)(t[3]) * (g[0]));
+        x74 = ((long)(t[2]) * (g[7]));
+        x75 = ((long)(t[2]) * (g[6]));
+        x76 = ((long)(t[2]) * (g[5]));
+        x77 = ((long)(t[2]) * (g[4]));
+        x78 = ((long)(t[2]) * (g[3]));
+        x79 = ((long)(t[2]) * (g[2]));
+        x80 = ((long)(t[2]) * (g[1]));
+        x81 = ((long)(t[2]) * (g[0]));
+        x82 = ((long)(t[1]) * (g[8]));
+        x83 = ((long)(t[1]) * ((g[7]) * 0x2));
+        x84 = ((long)(t[1]) * (g[6]));
+        x85 = ((long)(t[1]) * ((g[5]) * 0x2));
+        x86 = ((long)(t[1]) * (g[4]));
+        x87 = ((long)(t[1]) * ((g[3]) * 0x2));
+        x88 = ((long)(t[1]) * (g[2]));
+        x89 = ((long)(t[1]) * ((g[1]) * 0x2));
+        x90 = ((long)(t[1]) * (g[0]));
+        x91 = ((long)(t[0]) * (g[9]));
+        x92 = ((long)(t[0]) * (g[8]));
+        x93 = ((long)(t[0]) * (g[7]));
+        x94 = ((long)(t[0]) * (g[6]));
+        x95 = ((long)(t[0]) * (g[5]));
+        x96 = ((long)(t[0]) * (g[4]));
+        x97 = ((long)(t[0]) * (g[3]));
+        x98 = ((long)(t[0]) * (g[2]));
+        x99 = ((long)(t[0]) * (g[1]));
+        x100 = ((long)(t[0]) * (g[0]));
+        x101 = (x100 + (x45 + (x44 + (x42 + (x39 + (x35 + (x30 + (x24 + (x17 + x9)))))))));
+        x102 = (x101 >> 26);
+        x103 = (int)(x101 & 0x3ffffff);
+        x104 = (x91 + (x82 + (x74 + (x67 + (x61 + (x56 + (x52 + (x49 + (x47 + x46)))))))));
+        x105 = (x92 + (x83 + (x75 + (x68 + (x62 + (x57 + (x53 + (x50 + (x48 + x1)))))))));
+        x106 = (x93 + (x84 + (x76 + (x69 + (x63 + (x58 + (x54 + (x51 + (x10 + x2)))))))));
+        x107 = (x94 + (x85 + (x77 + (x70 + (x64 + (x59 + (x55 + (x18 + (x11 + x3)))))))));
+        x108 = (x95 + (x86 + (x78 + (x71 + (x65 + (x60 + (x25 + (x19 + (x12 + x4)))))))));
+        x109 = (x96 + (x87 + (x79 + (x72 + (x66 + (x31 + (x26 + (x20 + (x13 + x5)))))))));
+        x110 = (x97 + (x88 + (x80 + (x73 + (x36 + (x32 + (x27 + (x21 + (x14 + x6)))))))));
+        x111 = (x98 + (x89 + (x81 + (x40 + (x37 + (x33 + (x28 + (x22 + (x15 + x7)))))))));
+        x112 = (x99 + (x90 + (x43 + (x41 + (x38 + (x34 + (x29 + (x23 + (x16 + x8)))))))));
+        x113 = (x102 + x112);
+        x114 = (x113 >> 25);
+        x115 = (int)(x113 & 0x1ffffff);
+        x116 = (x114 + x111);
+        x117 = (x116 >> 26);
+        x118 = (int)(x116 & 0x3ffffff);
+        x119 = (x117 + x110);
+        x120 = (x119 >> 25);
+        x121 = (int)(x119 & 0x1ffffff);
+        x122 = (x120 + x109);
+        x123 = (x122 >> 26);
+        x124 = (int)(x122 & 0x3ffffff);
+        x125 = (x123 + x108);
+        x126 = (x125 >> 25);
+        x127 = (int)(x125 & 0x1ffffff);
+        x128 = (x126 + x107);
+        x129 = (x128 >> 26);
+        x130 = (int)(x128 & 0x3ffffff);
+        x131 = (x129 + x106);
+        x132 = (x131 >> 25);
+        x133 = (int)(x131 & 0x1ffffff);
+        x134 = (x132 + x105);
+        x135 = (x134 >> 26);
+        x136 = (int)(x134 & 0x3ffffff);
+        x137 = (x135 + x104);
+        x138 = (x137 >> 25);
+        x139 = (int)(x137 & 0x1ffffff);
+        x140 = (x138 * (byte) 0x13);
+        x141 = (x103 + x140);
+        x142 = (int)(x141 >> 26);
+        x143 = (int)(x141 & 0x3ffffff);
+        x144 = (x142 + x115);
+        x145 = (byte)(x144 >> 25);
+        x146 = (x144 & 0x1ffffff);
+        x147 = (x145 + x118);
+        int[] out1 = new int[10];
+        out1[0] = x143;
+        out1[1] = x146;
+        out1[2] = x147;
+        out1[3] = x121;
+        out1[4] = x124;
+        out1[5] = x127;
+        out1[6] = x130;
+        out1[7] = x133;
+        out1[8] = x136;
+        out1[9] = x139;
+        return new Ed25519FieldElement(f, out1);
     }
 
     /**
@@ -961,6 +1058,66 @@ public class Ed25519FieldElement extends FieldElement {
     }
 
     @Override
+    public FieldElement carry() {
+        int x1;
+        int x2;
+        int x3;
+        int x4;
+        int x5;
+        int x6;
+        int x7;
+        int x8;
+        int x9;
+        int x10;
+        int x11;
+        int x12;
+        int x13;
+        int x14;
+        int x15;
+        int x16;
+        int x17;
+        int x18;
+        int x19;
+        int x20;
+        int x21;
+        int x22;
+        x1 = (this.t[0]);
+        x2 = ((x1 >>> 26) + (this.t[1]));
+        x3 = ((x2 >>> 25) + (this.t[2]));
+        x4 = ((x3 >>> 26) + (this.t[3]));
+        x5 = ((x4 >>> 25) + (this.t[4]));
+        x6 = ((x5 >>> 26) + (this.t[5]));
+        x7 = ((x6 >>> 25) + (this.t[6]));
+        x8 = ((x7 >>> 26) + (this.t[7]));
+        x9 = ((x8 >>> 25) + (this.t[8]));
+        x10 = ((x9 >>> 26) + (this.t[9]));
+        x11 = ((x1 & 0x3ffffff) + ((x10 >> 25) * (byte) 0x13));
+        x12 = ((byte)(x11 >>> 26) + (x2 & 0x1ffffff));
+        x13 = (x11 & 0x3ffffff);
+        x14 = (x12 & 0x1ffffff);
+        x15 = ((byte)(x12 >>> 25) + (x3 & 0x3ffffff));
+        x16 = (x4 & 0x1ffffff);
+        x17 = (x5 & 0x3ffffff);
+        x18 = (x6 & 0x1ffffff);
+        x19 = (x7 & 0x3ffffff);
+        x20 = (x8 & 0x1ffffff);
+        x21 = (x9 & 0x3ffffff);
+        x22 = (x10 & 0x1ffffff);
+        int[] out1 = new int[10];
+        out1[0] = x13;
+        out1[1] = x14;
+        out1[2] = x15;
+        out1[3] = x16;
+        out1[4] = x17;
+        out1[5] = x18;
+        out1[6] = x19;
+        out1[7] = x20;
+        out1[8] = x21;
+        out1[9] = x22;
+        return new Ed25519FieldElement(this.f, out1);
+    }
+
+    @Override
     public int hashCode() {
         return Arrays.hashCode(t);
     }
@@ -975,6 +1132,9 @@ public class Ed25519FieldElement extends FieldElement {
 
     @Override
     public String toString() {
-        return "[Ed25519FieldElement val="+Utils.bytesToHex(toByteArray())+"]";
+//        return "[Ed25519FieldElement val="+Utils.bytesToHex(toByteArray())+"]";
+        StringBuilder sb = new StringBuilder();
+        for (int i : t) sb.append(i & 0xFFFF_FFFFL).append(" ");
+        return sb.toString();
     }
 }

@@ -785,15 +785,16 @@ public class GroupElement implements Serializable {
         if (q.repr != Representation.CACHED)
             throw new IllegalArgumentException();
 
-        FieldElement YpX, YmX, A, B, C, ZZ, D;
+        FieldElement YpX, YmX, trZ, trY, trT, trX, D;
         YpX = Y.add(X);
         YmX = Y.subtract(X);
-        A = YpX.multiply(q.Y); // q->Y-X
-        B = YmX.multiply(q.X); // q->Y+X
-        C = q.T.multiply(T); // q->2dT
-        ZZ = Z.multiply(q.Z);
-        D = ZZ.add(ZZ);
-        return p1p1(curve, A.subtract(B), A.add(B), D.subtract(C), D.add(C));
+        trZ = YpX.multiply(q.Y); // q->Y-X
+        trY = YmX.multiply(q.X); // q->Y+X
+        trT = q.T.multiply(T); // q->2dT
+        trX = Z.multiply(q.Z);
+        D = trX.add(trX);
+        System.out.println("===> " + D.toString());
+        return p1p1(curve, trZ.subtract(trY), trZ.add(trY), D.subtract(trT), D.add(trT));
     }
 
     /**

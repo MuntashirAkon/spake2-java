@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2021 Muntashir Al-Islam
+
+ Licensed according to the LICENSE file in this repository.
+-->
+<manifest package="io.github.muntashirakon.crypto.spake2" />

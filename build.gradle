@@ -4,59 +4,31 @@
  * Licensed according to the LICENSE file in this repository.
  */
 
-plugins {
-    id 'java-library'
-    id 'maven-publish'
-}
-
-group = 'io.github.muntashirakon'
-version = '0.9.0'
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
-repositories {
-    mavenCentral()
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.2.2'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
 }
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId = 'spake2'
-
-            from components.java
-
-            pom {
-                name = 'SPAKE2-Java'
-                description = 'Implementation of SPAKE2 protocol in Java, fully compatible with BoringSSL.'
-                url = 'https://github.com/MuntashirAkon/spake2-java'
-                licenses {
-                    license {
-                        name = 'GNU General Public License, Version 3.0 or later'
-                        url = 'https://www.gnu.org/licenses/gpl-3.0.txt'
-                    }
-                }
-            }
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
         }
     }
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-javadoc {
-    exclude 'io/github/muntashirakon/crypto/ed25519/**'
-    if(JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
-    }
-}
-
-dependencies {
-    testImplementation 'junit:junit:4.13.2'
 }

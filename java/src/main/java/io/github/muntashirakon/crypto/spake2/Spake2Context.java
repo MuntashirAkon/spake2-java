@@ -342,6 +342,14 @@ public class Spake2Context implements Destroyable {
      * @throws IllegalStateException    If the message has already been generated.
      */
     public byte[] generateMessage(final byte[] password) throws IllegalArgumentException, IllegalStateException {
+        byte[] privateKey = new byte[64];
+        new SecureRandom().nextBytes(privateKey);
+        System.out.printf("PVKEY(%s): %s%n", myRole, Utils.bytesToHex(privateKey));
+        return generateMessage(password, privateKey);
+    }
+
+    // Package private method for testing purposes
+    byte[] generateMessage(final byte[] password, byte[] privateKey) throws IllegalArgumentException, IllegalStateException {
         if (isDestroyed) {
             throw new IllegalStateException("The context was destroyed.");
         }
@@ -351,8 +359,6 @@ public class Spake2Context implements Destroyable {
 
         Ed25519ScalarOps scalarOps = curveSpec.getScalarOps();
 
-        byte[] privateKey = new byte[64];
-        new SecureRandom().nextBytes(privateKey);
         System.arraycopy(scalarOps.reduce(privateKey), 0, privateKey, 0, 32);
         // Multiply by the cofactor (eight) so that we'll clear it when operating on
         // the peer's point later in the protocol.
@@ -437,16 +443,24 @@ public class Spake2Context implements Destroyable {
             throw new IllegalArgumentException("Point received from peer was not on the curve.");
         }
 
+        System.out.printf("Q*(%s): %s%n", myRole, Utils.bytesToHex(QStar.toByteArray()));
+
         // Unmask peer's value.
         GroupElement peersMask = geScalarMultiplySmallPrecomp(curveSpec.getCurve(), this.passwordScalar,
                 this.myRole == Spake2Role.Alice ? SPAKE_N_SMALL_PRECOMP : SPAKE_M_SMALL_PRECOMP);
+
+        System.out.printf("PEER'S MASK(%s): %s%n", myRole, Utils.bytesToHex(peersMask.toByteArray()));
 
         GroupElement QExt = QStar.sub(peersMask.toCached()).toP3();
         // FIXME: Create a single precomp converter or fix generating single precompute
         GroupElement QPrecomp = new GroupElement(QExt.getCurve(), GroupElement.Representation.P3, QExt.getX(),
                 QExt.getY(), QExt.getZ(), QExt.getT(), true, true);
 
+        System.out.printf("QExt(%s): %s%n", myRole, Utils.bytesToHex(QExt.toByteArray()));
+
         byte[] dhShared = QPrecomp.scalarMultiply(this.privateKey).toByteArray();
+
+        System.out.printf("DH(%s): %s%n", myRole, Utils.bytesToHex(dhShared));
 
         MessageDigest sha;
         try {

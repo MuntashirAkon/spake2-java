@@ -100,6 +100,21 @@ public class Spake25519Test {
         return table;
     }
 
+    private static void printCTable(byte[] table, String name) {
+        System.out.printf("static const uint8_t %s[%d] = {", name, table.length);
+        for (int i = 0; i < table.length; ++i) {
+            if (i % 12 == 0) System.out.printf("%n    ");
+            System.out.printf(" 0x%02X,", table[i]);
+        }
+        System.out.println("\n};");
+    }
+
+    @Test
+    public void testPrintTables() {
+        printCTable(Utils.hexToBytes("47f6c458e5f062db8427d2d9bb20c954a76d6943959756a18d11d45e1ad190f980a86d185a93ca1d3025c5febe3aac4045b34a39b1f511385ca97fc4332137f3"), "kAlicePrivKey");
+        printCTable(Utils.hexToBytes("a6bf9f9bf7819e0ded8c2dd82a1aa38acb2f8a6403429cff33d64ea9c40439d5fd7029811a5f5a8f7c89c8b44ac0b421f6b24ca2ba18d2069995831730cd8c5a"), "kBobPrivKey");
+    }
+
     @Test
     public void scalarTestCmov() {
         Spake2Context.Scalar scalar = new Spake2Context.Scalar(Utils.hexToBytes(
@@ -189,11 +204,10 @@ public class Spake25519Test {
     @Test
     public void spake2() {
         for (int i = 0; i < 20; i++) {
+            System.out.println("========");
             SPAKE2Run spake2 = new SPAKE2Run();
             assertTrue(spake2.run());
-            if (!spake2.key_matches()) {
-                System.out.printf("Iteration %d: Keys didn't match.\n", i);
-            }
+            assertTrue(spake2.keyMatches());
         }
     }
 
@@ -203,7 +217,7 @@ public class Spake25519Test {
             SPAKE2Run spake2 = new SPAKE2Run();
             spake2.aliceDisablePasswordScalarHack = true;
             assertTrue(spake2.run());
-            if (!spake2.key_matches()) {
+            if (!spake2.keyMatches()) {
                 System.out.printf("Iteration %d: Keys didn't match.\n", i);
             }
         }
@@ -215,7 +229,7 @@ public class Spake25519Test {
             SPAKE2Run spake2 = new SPAKE2Run();
             spake2.bobDisablePasswordScalarHack = true;
             assertTrue(spake2.run());
-            if (!spake2.key_matches()) {
+            if (!spake2.keyMatches()) {
                 System.out.printf("Iteration %d: Keys didn't match.\n", i);
             }
         }
@@ -224,9 +238,9 @@ public class Spake25519Test {
     @Test
     public void wrongPassword() {
         SPAKE2Run spake2 = new SPAKE2Run();
-        spake2.bobPassword = "wrong password";
+        spake2.bobPassword = "wrong password".getBytes(StandardCharsets.UTF_8);
         assertTrue(spake2.run());
-        assertFalse(spake2.key_matches());
+        assertFalse(spake2.keyMatches());
     }
 
     @Test
@@ -235,7 +249,7 @@ public class Spake25519Test {
         spake2.aliceNames.second = "charlie";
         spake2.bobNames.second = "charlie";
         assertTrue(spake2.run());
-        assertFalse(spake2.key_matches());
+        assertFalse(spake2.keyMatches());
     }
 
     @Test
@@ -243,16 +257,16 @@ public class Spake25519Test {
         for (int i = 0; i < 8 * Spake2Context.MAX_MSG_SIZE; i++) {
             SPAKE2Run spake2 = new SPAKE2Run();
             spake2.aliceCorruptMsgBit = i;
-            assertFalse(spake2.run() && spake2.key_matches());
+            assertFalse(spake2.run() && spake2.keyMatches());
         }
     }
 
     // Based on https://android.googlesource.com/platform/external/boringssl/+/f9e0b0e17fabac35627f18f94a8954c3857784ac/src/crypto/curve25519/spake25519_test.cc
     private static class SPAKE2Run {
-        private final Pair<String, String> aliceNames = new Pair<>("alice", "bob");
-        private final Pair<String, String> bobNames = new Pair<>("bob", "alice");
-        private final String alicePassword = "password";
-        private String bobPassword = "password";
+        private final Pair<String, String> aliceNames = new Pair<>("adb pair client\u0000", "adb pair server\u0000");
+        private final Pair<String, String> bobNames = new Pair<>("adb pair server\u0000", "adb pair client\u0000");
+        private final byte[] alicePassword = Utils.hexToBytes("353932373831E63DD959651C211600F3B6561D0B9D90AF09D0A4A453EE2059A480CC7C5A94D4D48933F9FFF5FE43317D52FA7BFF8F8BC4F3488B8007330FEC7C7EDC91C20E5D");
+        private byte[] bobPassword = alicePassword;
         private boolean aliceDisablePasswordScalarHack = false;
         private boolean bobDisablePasswordScalarHack = false;
         private int aliceCorruptMsgBit = -1;
@@ -279,11 +293,14 @@ public class Spake25519Test {
             byte[] bobMsg;
 
             try {
-                aliceMsg = alice.generateMessage(alicePassword.getBytes(StandardCharsets.UTF_8));
-                bobMsg = bob.generateMessage(bobPassword.getBytes(StandardCharsets.UTF_8));
+                aliceMsg = alice.generateMessage(alicePassword, Utils.hexToBytes("47f6c458e5f062db8427d2d9bb20c954a76d6943959756a18d11d45e1ad190f980a86d185a93ca1d3025c5febe3aac4045b34a39b1f511385ca97fc4332137f3"));
+                bobMsg = bob.generateMessage(bobPassword, Utils.hexToBytes("a6bf9f9bf7819e0ded8c2dd82a1aa38acb2f8a6403429cff33d64ea9c40439d5fd7029811a5f5a8f7c89c8b44ac0b421f6b24ca2ba18d2069995831730cd8c5a"));
             } catch (Exception e) {
                 return false;
             }
+
+            System.out.printf("ALICE_MSG: %s%n", Utils.bytesToHex(aliceMsg));
+            System.out.printf("BOB_MSG: %s%n", Utils.bytesToHex(bobMsg));
 
             if (aliceCorruptMsgBit >= 0 && aliceCorruptMsgBit < (8 * aliceMsg.length)) {
                 aliceMsg[aliceCorruptMsgBit / 8] ^= 1 << (aliceCorruptMsgBit & 7);
@@ -298,12 +315,15 @@ public class Spake25519Test {
                 return false;
             }
 
+            System.out.printf("ALICE_KEY: %s%n", Utils.bytesToHex(aliceKey));
+            System.out.printf("BOB_KEY: %s%n", Utils.bytesToHex(bobKey));
+
             keyMatches = Arrays.equals(aliceKey, bobKey);
 
             return true;
         }
 
-        boolean key_matches() {
+        boolean keyMatches() {
             return keyMatches;
         }
     }

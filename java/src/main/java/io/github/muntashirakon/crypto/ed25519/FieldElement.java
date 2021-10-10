@@ -64,6 +64,8 @@ public abstract class FieldElement implements Serializable {
 
     public abstract FieldElement cmov(FieldElement val, final int b);
 
+    public abstract FieldElement carry();
+
     @Override
     public abstract boolean equals(Object o);
 
