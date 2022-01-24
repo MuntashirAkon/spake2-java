@@ -1,0 +1,3 @@
+[submodule "android/src/main/cpp/spake2-c"]
+	path = android/src/main/cpp/spake2-c
+	url = https://github.com/MuntashirAkon/spake2-c.git
