@@ -15,42 +15,52 @@ public class Spake2Context implements Destroyable {
     static {
         System.loadLibrary("spake2");
     }
-    private final long ctx;
 
-    private byte[] myMsg = new byte[32];
-    private boolean isDestroyed;
+    /**
+     * Maximum message size in bytes
+     */
+    public static final int MAX_MSG_SIZE = 32;
+    /**
+     * Maximum key size in bytes
+     */
+    public static final int MAX_KEY_SIZE = 64;
+
+    private final long mCtx;
+
+    private final byte[] mMyMsg = new byte[MAX_MSG_SIZE];
+    private boolean mIsDestroyed;
 
     public Spake2Context(@NonNull Spake2Role myRole,
                          final byte[] myName,
                          final byte[] theirName) {
-        ctx = allocNewContext(myRole.ordinal(), myName, theirName);
-        if (ctx == 0L) {
+        mCtx = allocNewContext(myRole.ordinal(), myName, theirName);
+        if (mCtx == 0L) {
             throw new UnsupportedOperationException("Could not allocate native context");
         }
     }
 
     @NonNull
     public byte[] getMyMsg() {
-        return myMsg;
+        return mMyMsg;
     }
 
     public byte[] generateMessage(byte[] password) throws IllegalStateException {
-        if (isDestroyed) {
+        if (mIsDestroyed) {
             throw new IllegalStateException("The context was destroyed.");
         }
-        byte[] myMsg = generateMessage(ctx, password);
+        byte[] myMsg = generateMessage(mCtx, password);
         if (myMsg == null) {
             throw new IllegalStateException("Generated empty message");
         }
-        System.arraycopy(myMsg, 0, this.myMsg, 0, 32);
+        System.arraycopy(myMsg, 0, this.mMyMsg, 0, MAX_MSG_SIZE);
         return myMsg;
     }
 
     public byte[] processMessage(byte[] theirMessage) throws IllegalStateException {
-        if (isDestroyed) {
+        if (mIsDestroyed) {
             throw new IllegalStateException("The context was destroyed.");
         }
-        byte[] key = processMessage(ctx, theirMessage);
+        byte[] key = processMessage(mCtx, theirMessage);
         if (key == null) {
             throw new IllegalStateException("No key was returned");
         }
@@ -59,13 +69,13 @@ public class Spake2Context implements Destroyable {
 
     @Override
     public boolean isDestroyed() {
-        return isDestroyed;
+        return mIsDestroyed;
     }
 
     @Override
     public void destroy() {
-        isDestroyed = true;
-        destroy(ctx);
+        mIsDestroyed = true;
+        destroy(mCtx);
     }
 
     private static native long allocNewContext(int myRole, byte[] myName, byte[] theirName);

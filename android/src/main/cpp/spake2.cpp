@@ -4,6 +4,12 @@
 
 #include "spake25519.c"
 
+#include "io_github_muntashirakon_crypto_spake2_Spake2Context.h"
+
+#ifndef nullptr
+#define nullptr NULL
+#endif
+
 static jlong Spake2Context_AllocNewContext(JNIEnv *env, jclass clazz, jint myRole, jbyteArray myName, jbyteArray theirName) {
     spake2_role_t my_role = myRole == 0 ? spake2_role_alice : spake2_role_bob;
     auto my_len = env->GetArrayLength(myName);
@@ -12,6 +18,8 @@ static jlong Spake2Context_AllocNewContext(JNIEnv *env, jclass clazz, jint myRol
     auto their_name = env->GetByteArrayElements(theirName, nullptr);
 
     struct spake2_ctx_st *ctx = SPAKE2_CTX_new(my_role, (uint8_t *) my_name, my_len, (uint8_t *) their_name, their_len);
+    env->ReleaseByteArrayElements(myName, my_name, 0);
+    env->ReleaseByteArrayElements(theirName, their_name, 0);
     if (ctx == nullptr) {
         printf("Couldn't create SPAKE2 context");
         return 0;

@@ -10,7 +10,15 @@
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
+#if defined(__linux__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 #include <endian.h>
+#elif __FreeBSD__
+#include <sys/endian.h>
+#elif defined(__APPLE__) && defined(__MACH__)
+#include <machine/endian.h>
+#else
+#error Couldn't find any appropriate endian.h
+#endif
 
 
 /* Structure to save state of computation between the single steps.  */
