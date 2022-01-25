@@ -33,11 +33,9 @@ Java implementation too.
 
 ## Credits
 
-- ED25519 implementation is a modified and a simplified version of the [EdDSA-Java](https://github.com/str4d/ed25519-java) library (CC0 license).
-- Spake2 implementation is based on [BoringSSL's spake25519.c](https://android.googlesource.com/platform/external/boringssl/+/f9e0b0e17fabac35627f18f94a8954c3857784ac/src/crypto/curve25519/spake25519.c) (MIT license).
-- A few methods are modified from [Curve25519-java](https://github.com/signalapp/curve25519-java) (GPL-3.0 license).
+ED25519 implementation is a modified and a simplified version of the [EdDSA-Java](https://github.com/str4d/ed25519-java) library (CC0 license).
 
 ## License
 Copyright 2021 Muntashir Al-Islam
 
-Licensed under the GPLv3: https://www.gnu.org/licenses/gpl-3.0.html
+Licensed under the LGPL-3.0: http://www.gnu.org/licenses/lgpl-3.0.html

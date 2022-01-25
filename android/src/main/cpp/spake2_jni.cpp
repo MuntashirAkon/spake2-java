@@ -1,10 +1,14 @@
-#include<cstdio>
-#include<cstdlib>
-#include<jni.h>
+/*
+ * Copyright (C) 2021 Muntashir Al-Islam
+ *
+ * Licensed according to the LICENSE file in this repository.
+ */
 
-#include "spake25519.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include <jni.h>
 
-#include "io_github_muntashirakon_crypto_spake2_Spake2Context.h"
+#include <spake2/spake2.h>
 
 #ifndef nullptr
 #define nullptr NULL
