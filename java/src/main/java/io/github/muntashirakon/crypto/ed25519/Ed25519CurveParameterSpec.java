@@ -21,17 +21,15 @@ public class Ed25519CurveParameterSpec implements AlgorithmParameterSpec, Serial
 
     private final Curve curve;
     private final String hashAlgo;
-    private final Ed25519ScalarOps sc;
     private final GroupElement B;
 
     /**
      * @param curve    the curve
      * @param hashAlgo the JCA string for the hash algorithm
-     * @param sc       the parameter L represented as Ed25519ScalarOps
      * @param B        the parameter B
      * @throws IllegalArgumentException if hash algorithm is unsupported or length is wrong
      */
-    public Ed25519CurveParameterSpec(Curve curve, String hashAlgo, Ed25519ScalarOps sc, GroupElement B) {
+    public Ed25519CurveParameterSpec(Curve curve, String hashAlgo, GroupElement B) {
         try {
             MessageDigest hash = MessageDigest.getInstance(hashAlgo);
             // EdDSA hash function must produce 2b-bit output
@@ -43,7 +41,6 @@ public class Ed25519CurveParameterSpec implements AlgorithmParameterSpec, Serial
 
         this.curve = curve;
         this.hashAlgo = hashAlgo;
-        this.sc = sc;
         this.B = B;
     }
 
@@ -57,10 +54,6 @@ public class Ed25519CurveParameterSpec implements AlgorithmParameterSpec, Serial
 
     public String getHashAlgorithm() {
         return hashAlgo;
-    }
-
-    public Ed25519ScalarOps getScalarOps() {
-        return sc;
     }
 
     /**

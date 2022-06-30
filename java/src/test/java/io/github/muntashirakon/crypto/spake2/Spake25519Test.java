@@ -6,6 +6,11 @@
 
 package io.github.muntashirakon.crypto.spake2;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -19,8 +24,7 @@ import io.github.muntashirakon.crypto.ed25519.Ed25519Field;
 import io.github.muntashirakon.crypto.ed25519.FieldElement;
 import io.github.muntashirakon.crypto.ed25519.GroupElement;
 import io.github.muntashirakon.crypto.ed25519.Utils;
-
-import static org.junit.Assert.*;
+import io.github.muntashirakon.crypto.x25519.x25519Scalar;
 
 public class Spake25519Test {
     private static final byte[] B_EIGHT = Utils.hexToBytes("0800000000000000000000000000000000000000000000000000000000000000");
@@ -109,10 +113,24 @@ public class Spake25519Test {
         System.out.println("\n};");
     }
 
-    @Test
-    public void testPrintTables() {
+    public void printPasswords() {
         printCTable(Utils.hexToBytes("47f6c458e5f062db8427d2d9bb20c954a76d6943959756a18d11d45e1ad190f980a86d185a93ca1d3025c5febe3aac4045b34a39b1f511385ca97fc4332137f3"), "kAlicePrivKey");
         printCTable(Utils.hexToBytes("a6bf9f9bf7819e0ded8c2dd82a1aa38acb2f8a6403429cff33d64ea9c40439d5fd7029811a5f5a8f7c89c8b44ac0b421f6b24ca2ba18d2069995831730cd8c5a"), "kBobPrivKey");
+    }
+
+    @Test
+    public void testX25519ScReduce() {
+        byte[] expected = Utils.hexToBytes("00f4f4563dba61b24551c122bbbb630855b1b5ed3f0a619792a0d9fd2a2cfb3880a86d185a93ca1d3025c5febe3aac4045b34a39b1f511385ca97fc4332137f3");
+        byte[] privateKey = Utils.hexToBytes("47f6c458e5f062db8427d2d9bb20c954a76d6943959756a18d11d45e1ad190f980a86d185a93ca1d3025c5febe3aac4045b34a39b1f511385ca97fc4332137f3");
+        x25519Scalar.reduce(privateKey);
+        Spake2Context.leftShift3(privateKey);
+        assertEquals(Utils.bytesToHex(expected), Utils.bytesToHex(privateKey));
+    }
+
+    @Test
+    public void testAllOnesIfEquals() {
+        assertEquals(Spake2Context.isEqual(1, 1), 0xffff_ffff);
+        assertEquals(Spake2Context.isEqual(1, 0), 0x0);
     }
 
     @Test
@@ -120,20 +138,35 @@ public class Spake25519Test {
         Spake2Context.Scalar scalar = new Spake2Context.Scalar(Utils.hexToBytes(
                 "edd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010"));
         Spake2Context.Scalar zero = new Spake2Context.Scalar();
-        assertEquals("0000000000000000000000000000000000000000000000000000000000000000",
-                Utils.bytesToHex(scalar.cmov(zero, 0).getBytes()));
-        assertEquals("0100000000000000000000000000000000000000000000000000000000000000",
-                Utils.bytesToHex(scalar.cmov(zero, 1).getBytes()));
-        assertEquals("0500000000000000040000000400000000000000000000000000000000000000",
-                Utils.bytesToHex(scalar.cmov(zero, 5).getBytes()));
-        assertEquals("0100000010000000100000001000000000000000000000000000000000000000",
-                Utils.bytesToHex(scalar.cmov(zero, 0x11).getBytes()));
-        assertEquals("2100000010000000100000001000000000000000000000000000000000000000",
-                Utils.bytesToHex(scalar.cmov(zero, 0x31).getBytes()));
-        assertEquals("6100000010000000500000005000000000000000000000000000000000000000",
-                Utils.bytesToHex(scalar.cmov(zero, 0x71).getBytes()));
-        assertEquals("e900000018000000d0000000d800000000000000000000000000000000000000",
-                Utils.bytesToHex(scalar.cmov(zero, 0xF9).getBytes()));
+        Spake2Context.Scalar tmpScalar = new Spake2Context.Scalar();
+        tmpScalar.copy(scalar);
+        tmpScalar.cmov(zero, 0);
+        assertEquals("edd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010",
+                Utils.bytesToHex(tmpScalar.getBytes()));
+        tmpScalar.copy(scalar);
+        tmpScalar.cmov(zero, 1);
+        assertEquals("ecd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010",
+                Utils.bytesToHex(tmpScalar.getBytes()));
+        tmpScalar.copy(scalar);
+        tmpScalar.cmov(zero, 5);
+        assertEquals("e8d3f55c1a631258d29cf7a2daf9de1400000000000000000000000000000010",
+                Utils.bytesToHex(tmpScalar.getBytes()));
+        tmpScalar.copy(scalar);
+        tmpScalar.cmov(zero, 0x11);
+        assertEquals("ecd3f55c0a631258c69cf7a2cef9de1400000000000000000000000000000010",
+                Utils.bytesToHex(tmpScalar.getBytes()));
+        tmpScalar.copy(scalar);
+        tmpScalar.cmov(zero, 0x31);
+        assertEquals("ccd3f55c0a631258c69cf7a2cef9de1400000000000000000000000000000010",
+                Utils.bytesToHex(tmpScalar.getBytes()));
+        tmpScalar.copy(scalar);
+        tmpScalar.cmov(zero, 0x71);
+        assertEquals("8cd3f55c0a631258869cf7a28ef9de1400000000000000000000000000000010",
+                Utils.bytesToHex(tmpScalar.getBytes()));
+        tmpScalar.copy(scalar);
+        tmpScalar.cmov(zero, 0xf9);
+        assertEquals("04d3f55c02631258069cf7a206f9de1400000000000000000000000000000010",
+                Utils.bytesToHex(tmpScalar.getBytes()));
     }
 
     @Test
@@ -141,25 +174,25 @@ public class Spake25519Test {
         Spake2Context.Scalar scalar = new Spake2Context.Scalar(Utils.hexToBytes(
                 "edd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010"));
         Spake2Context.Scalar base = new Spake2Context.Scalar();
-        base.copy(scalar.cmov(base, 0));
+        base.cmov(scalar, 0);
         assertEquals("0000000000000000000000000000000000000000000000000000000000000000",
                 Utils.bytesToHex(base.getBytes()));
-        base.copy(scalar.cmov(base, 1));
+        base.cmov(scalar, 1);
         assertEquals("0100000000000000000000000000000000000000000000000000000000000000",
                 Utils.bytesToHex(base.getBytes()));
-        base.copy(scalar.cmov(base, 5));
+        base.cmov(scalar, 5);
         assertEquals("0500000000000000040000000400000000000000000000000000000000000000",
                 Utils.bytesToHex(base.getBytes()));
-        base.copy(scalar.cmov(base, 0x11));
+        base.cmov(scalar, 0x11);
         assertEquals("0500000010000000140000001400000000000000000000000000000000000000",
                 Utils.bytesToHex(base.getBytes()));
-        base.copy(scalar.cmov(base, 0x31));
+        base.cmov(scalar, 0x31);
         assertEquals("2500000010000000140000001400000000000000000000000000000000000000",
                 Utils.bytesToHex(base.getBytes()));
-        base.copy(scalar.cmov(base, 0x71));
+        base.cmov(scalar, 0x71);
         assertEquals("6500000010000000540000005400000000000000000000000000000000000000",
                 Utils.bytesToHex(base.getBytes()));
-        base.copy(scalar.cmov(base, 0xF9));
+        base.cmov(scalar, 0xf9);
         assertEquals("ed00000018000000d4000000dc00000000000000000000000000000000000000",
                 Utils.bytesToHex(base.getBytes()));
     }
@@ -169,13 +202,12 @@ public class Spake25519Test {
         Spake2Context.Scalar scalar = new Spake2Context.Scalar(Utils.hexToBytes(
                 "edd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010"));
         Spake2Context.Scalar eight = new Spake2Context.Scalar(B_EIGHT);
-        assertEquals("daa7ebb934c624b0ac39ef45bdf3bd2900000000000000000000000000000020",
-                Utils.bytesToHex(scalar.dbl().getBytes()));
-        assertEquals("1000000000000000000000000000000000000000000000000000000000000000",
-                Utils.bytesToHex(eight.dbl().getBytes()));
-        scalar.copy(scalar.dbl());
+        scalar.dbl();
         assertEquals("daa7ebb934c624b0ac39ef45bdf3bd2900000000000000000000000000000020",
                 Utils.bytesToHex(scalar.getBytes()));
+        eight.dbl();
+        assertEquals("1000000000000000000000000000000000000000000000000000000000000000",
+                Utils.bytesToHex(eight.getBytes()));
     }
 
     @Test
@@ -183,10 +215,12 @@ public class Spake25519Test {
         Spake2Context.Scalar scalar = new Spake2Context.Scalar(Utils.hexToBytes(
                 "edd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010"));
         Spake2Context.Scalar eight = new Spake2Context.Scalar(B_EIGHT);
+        eight.add(scalar);
         assertEquals("f5d3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010",
-                Utils.bytesToHex(eight.add(scalar).getBytes()));
+                Utils.bytesToHex(eight.getBytes()));
+        scalar.add(scalar);
         assertEquals("daa7ebb934c624b0ac39ef45bdf3bd2900000000000000000000000000000020",
-                Utils.bytesToHex(scalar.add(scalar).getBytes()));
+                Utils.bytesToHex(scalar.getBytes()));
     }
 
     @Test
@@ -214,24 +248,22 @@ public class Spake25519Test {
     @Test
     public void oldAlice() {
         for (int i = 0; i < 20; i++) {
+            System.out.println("========");
             SPAKE2Run spake2 = new SPAKE2Run();
             spake2.aliceDisablePasswordScalarHack = true;
             assertTrue(spake2.run());
-            if (!spake2.keyMatches()) {
-                System.out.printf("Iteration %d: Keys didn't match.\n", i);
-            }
+            assertTrue(spake2.keyMatches());
         }
     }
 
     @Test
     public void oldBob() {
         for (int i = 0; i < 20; i++) {
+            System.out.println("========");
             SPAKE2Run spake2 = new SPAKE2Run();
             spake2.bobDisablePasswordScalarHack = true;
             assertTrue(spake2.run());
-            if (!spake2.keyMatches()) {
-                System.out.printf("Iteration %d: Keys didn't match.\n", i);
-            }
+            assertTrue(spake2.keyMatches());
         }
     }
 

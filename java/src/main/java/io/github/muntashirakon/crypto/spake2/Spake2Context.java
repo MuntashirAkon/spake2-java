@@ -17,10 +17,10 @@ import io.github.muntashirakon.crypto.ed25519.Curve;
 import io.github.muntashirakon.crypto.ed25519.Ed25519;
 import io.github.muntashirakon.crypto.ed25519.Ed25519CurveParameterSpec;
 import io.github.muntashirakon.crypto.ed25519.Ed25519Field;
-import io.github.muntashirakon.crypto.ed25519.Ed25519ScalarOps;
 import io.github.muntashirakon.crypto.ed25519.FieldElement;
 import io.github.muntashirakon.crypto.ed25519.GroupElement;
 import io.github.muntashirakon.crypto.ed25519.Utils;
+import io.github.muntashirakon.crypto.x25519.x25519Scalar;
 
 @SuppressWarnings("unused")
 public class Spake2Context implements Destroyable {
@@ -270,69 +270,71 @@ public class Spake2Context implements Destroyable {
         SPAKE_M_SMALL_PRECOMP = getGEFromTable(spec.getCurve(), PRECOMP_TABLE_M);
     }
 
-    private final byte[] myName;
-    private final byte[] theirName;
-    private final Spake2Role myRole;
-    private final byte[] privateKey = new byte[32];
-    private final byte[] myMsg = new byte[32];
-    private final byte[] passwordScalar = new byte[32];
-    private final byte[] passwordHash = new byte[64];
-    private final Ed25519CurveParameterSpec curveSpec;
+    private final byte[] mMyName;
+    private final byte[] mTheirName;
+    private final Spake2Role mMyRole;
+    private final byte[] mPrivateKey = new byte[32];
+    private final byte[] mMyMsg = new byte[32];
+    private final byte[] mPasswordScalar = new byte[32];
+    private final byte[] mPasswordHash = new byte[64];
+    private final Ed25519CurveParameterSpec mCurveSpec;
 
-    private State state;
-    private boolean disablePasswordScalarHack;
-    private boolean isDestroyed = false;
+    private State mState;
+    private boolean mDisablePasswordScalarHack;
+    private boolean mIsDestroyed = false;
 
     public Spake2Context(Spake2Role myRole,
                          final byte[] myName,
                          final byte[] theirName) {
-        this.myRole = myRole;
-        this.myName = new byte[myName.length];
-        this.theirName = new byte[theirName.length];
-        this.state = State.Init;
+        mMyRole = myRole;
+        mMyName = new byte[myName.length];
+        mTheirName = new byte[theirName.length];
+        mState = State.Init;
 
-        System.arraycopy(myName, 0, this.myName, 0, myName.length);
-        System.arraycopy(theirName, 0, this.theirName, 0, theirName.length);
+        System.arraycopy(myName, 0, mMyName, 0, myName.length);
+        System.arraycopy(theirName, 0, mTheirName, 0, theirName.length);
 
-        curveSpec = Ed25519.getSpec();
+        mCurveSpec = Ed25519.getSpec();
     }
 
     public void setDisablePasswordScalarHack(boolean disablePasswordScalarHack) {
-        this.disablePasswordScalarHack = disablePasswordScalarHack;
+        mDisablePasswordScalarHack = disablePasswordScalarHack;
     }
 
     public boolean isDisablePasswordScalarHack() {
-        return disablePasswordScalarHack;
+        return mDisablePasswordScalarHack;
     }
 
     public Spake2Role getMyRole() {
-        return myRole;
+        return mMyRole;
     }
 
     public byte[] getMyMsg() {
-        return myMsg;
+        return mMyMsg;
     }
 
     public byte[] getMyName() {
-        return myName;
+        return mMyName;
     }
 
     public byte[] getTheirName() {
-        return theirName;
+        return mTheirName;
     }
 
     @Override
     public boolean isDestroyed() {
-        return isDestroyed;
+        return mIsDestroyed;
     }
 
     @Override
     public void destroy() {
-        isDestroyed = true;
-        Arrays.fill(privateKey, (byte) 0);
-        Arrays.fill(myMsg, (byte) 0);
-        Arrays.fill(passwordScalar, (byte) 0);
-        Arrays.fill(passwordHash, (byte) 0);
+        mIsDestroyed = true;
+        Arrays.fill(mMyName, (byte) 0);
+        Arrays.fill(mTheirName, (byte) 0);
+        Arrays.fill(mPrivateKey, (byte) 0);
+        Arrays.fill(mMyMsg, (byte) 0);
+        Arrays.fill(mPasswordScalar, (byte) 0);
+        Arrays.fill(mPasswordHash, (byte) 0);
     }
 
     /**
@@ -344,35 +346,34 @@ public class Spake2Context implements Destroyable {
     public byte[] generateMessage(final byte[] password) throws IllegalArgumentException, IllegalStateException {
         byte[] privateKey = new byte[64];
         new SecureRandom().nextBytes(privateKey);
-        System.out.printf("PVKEY(%s): %s%n", myRole, Utils.bytesToHex(privateKey));
+        System.out.printf("PVKEY(%s): %s%n", mMyRole, Utils.bytesToHex(privateKey));
         return generateMessage(password, privateKey);
     }
 
     // Package private method for testing purposes
     byte[] generateMessage(final byte[] password, byte[] privateKey) throws IllegalArgumentException, IllegalStateException {
-        if (isDestroyed) {
+        if (mIsDestroyed) {
             throw new IllegalStateException("The context was destroyed.");
         }
-        if (this.state != State.Init) {
-            throw new IllegalStateException("Invalid state: " + this.state);
+        if (mState != State.Init) {
+            throw new IllegalStateException("Invalid state: " + mState);
         }
 
-        Ed25519ScalarOps scalarOps = curveSpec.getScalarOps();
-
-        System.arraycopy(scalarOps.reduce(privateKey), 0, privateKey, 0, 32);
+        x25519Scalar.reduce(privateKey);
         // Multiply by the cofactor (eight) so that we'll clear it when operating on
         // the peer's point later in the protocol.
         leftShift3(privateKey);
-        System.arraycopy(privateKey, 0, this.privateKey, 0, this.privateKey.length);
+        System.arraycopy(privateKey, 0, mPrivateKey, 0, mPrivateKey.length);
 
-        final GroupElement P = curveSpec.getB().scalarMultiply(this.privateKey);
+        final GroupElement P = mCurveSpec.getB().scalarMultiply(mPrivateKey);
 
         byte[] passwordTmp = getHash("SHA-512", password);  // 64 byte
-        System.arraycopy(passwordTmp, 0, this.passwordHash, 0, this.passwordHash.length);
+        System.arraycopy(passwordTmp, 0, mPasswordHash, 0, mPasswordHash.length);
+        x25519Scalar.reduce(passwordTmp);
 
         /**
          * Due to a copy-paste error, the call to {@link #leftShift3(byte[])} was omitted after reducing it, just above.
-         * This meant that {@link #passwordScalar} was not a multiple of eight to clear the cofactor and thus three bits
+         * This meant that {@link #mPasswordScalar} was not a multiple of eight to clear the cofactor and thus three bits
          * of the password hash would leak. In order to fix this in a unilateral way, points of small order are added to
          * the mask point such as that it is in the prime-order subgroup. Since the ephemeral scalar is a multiple of
          * eight, these points will cancel out when calculating the shared secret.
@@ -381,44 +382,44 @@ public class Spake2Context implements Destroyable {
          * that's faster, this what is done below. {@link #l} is a large prime, thus, odd, thus the LSB is one. So,
          * adding it will flip the LSB. Adding twice, it will flip the next bit, and so on for all the bottom three bits.
          */
-        Scalar passwordScalar = new Scalar(scalarOps.reduce(passwordTmp));
+        Scalar passwordScalar = new Scalar(passwordTmp);
 
         /**
-         * passwordScalar is the result of scalar reducing and thus is, at most, $l-1$. In the following, we may add
-         * $l+2×l+4×l$ for a max value of $8×l-1$. That is less than $2^256$ as required.
+         * passwordScalar is the result of scalar reducing and thus is, at most, (l-1). In the following, we may add
+         * (l + 2×l + 4×l) for a max value of (8×l - 1). That is, < 2^256, as required.
          */
 
-        if (!this.disablePasswordScalarHack) {
+        if (!mDisablePasswordScalarHack) {
             Scalar order = new Scalar(l);
             Scalar tmp = new Scalar();
-            tmp.copy(order.cmov(tmp, isEqual(passwordScalar.getByte(0) & 1, 1)));
-            passwordScalar.copy(passwordScalar.add(tmp));
-            order.copy(order.dbl());
+            tmp.cmov(order, isEqual(passwordScalar.getByte(0) & 1, 1));
+            passwordScalar.add(tmp);
+            order.dbl();
 
             tmp.reset();
-            tmp.copy(order.cmov(tmp, isEqual(passwordScalar.getByte(0) & 2, 2)));
-            passwordScalar.copy(passwordScalar.add(tmp));
-            order.copy(order.dbl());
+            tmp.cmov(order, isEqual(passwordScalar.getByte(0) & 2, 2));
+            passwordScalar.add(tmp);
+            order.dbl();
 
             tmp.reset();
-            tmp.copy(order.cmov(tmp, isEqual(passwordScalar.getByte(0) & 4, 4)));
-            passwordScalar.copy(passwordScalar.add(tmp));
+            tmp.cmov(order, isEqual(passwordScalar.getByte(0) & 4, 4));
+            passwordScalar.add(tmp);
 
             assert ((passwordScalar.getByte(0) & 7) == 0);
         }
 
-        System.arraycopy(passwordScalar.getBytes(), 0, this.passwordScalar, 0, this.passwordScalar.length);
+        System.arraycopy(passwordScalar.getBytes(), 0, mPasswordScalar, 0, mPasswordScalar.length);
 
         // mask = h(password) * <N or M>.
-        GroupElement mask = geScalarMultiplySmallPrecomp(curveSpec.getCurve(), this.passwordScalar,
-                this.myRole == Spake2Role.Alice ? SPAKE_M_SMALL_PRECOMP : SPAKE_N_SMALL_PRECOMP);
+        GroupElement mask = geScalarMultiplySmallPrecomp(mCurveSpec.getCurve(), mPasswordScalar,
+                mMyRole == Spake2Role.Alice ? SPAKE_M_SMALL_PRECOMP : SPAKE_N_SMALL_PRECOMP);
 
         // P* = P + mask.
         GroupElement PStar = P.add(mask.toCached()).toP2();
 
-        System.arraycopy(PStar.toByteArray(), 0, this.myMsg, 0, this.myMsg.length);
-        this.state = State.MsgGenerated;
-        return this.myMsg.clone();
+        System.arraycopy(PStar.toByteArray(), 0, mMyMsg, 0, mMyMsg.length);
+        mState = State.MsgGenerated;
+        return mMyMsg.clone();
     }
 
     /**
@@ -428,39 +429,39 @@ public class Spake2Context implements Destroyable {
      * @throws IllegalStateException    If the key has already been generated.
      */
     public byte[] processMessage(final byte[] theirMsg) throws IllegalArgumentException, IllegalStateException {
-        if (isDestroyed) {
+        if (mIsDestroyed) {
             throw new IllegalStateException("The context was destroyed.");
         }
-        if (this.state != State.MsgGenerated) {
-            throw new IllegalStateException("Invalid state: " + this.state);
+        if (mState != State.MsgGenerated) {
+            throw new IllegalStateException("Invalid state: " + mState);
         }
         if (theirMsg.length != 32) {
             throw new IllegalArgumentException("Peer's message is not 32 bytes");
         }
 
-        GroupElement QStar = curveSpec.getCurve().fromBytesNegateVarTime(theirMsg);
+        GroupElement QStar = mCurveSpec.getCurve().fromBytesNegateVarTime(theirMsg);
         if (QStar == null) {
             throw new IllegalArgumentException("Point received from peer was not on the curve.");
         }
 
-        System.out.printf("Q*(%s): %s%n", myRole, Utils.bytesToHex(QStar.toByteArray()));
+        System.out.printf("Q*(%s): %s%n", mMyRole, Utils.bytesToHex(QStar.toByteArray()));
 
         // Unmask peer's value.
-        GroupElement peersMask = geScalarMultiplySmallPrecomp(curveSpec.getCurve(), this.passwordScalar,
-                this.myRole == Spake2Role.Alice ? SPAKE_N_SMALL_PRECOMP : SPAKE_M_SMALL_PRECOMP);
+        GroupElement peersMask = geScalarMultiplySmallPrecomp(mCurveSpec.getCurve(), mPasswordScalar,
+                mMyRole == Spake2Role.Alice ? SPAKE_N_SMALL_PRECOMP : SPAKE_M_SMALL_PRECOMP);
 
-        System.out.printf("PEER'S MASK(%s): %s%n", myRole, Utils.bytesToHex(peersMask.toByteArray()));
+        System.out.printf("PEER'S MASK(%s): %s%n", mMyRole, Utils.bytesToHex(peersMask.toByteArray()));
 
         GroupElement QExt = QStar.sub(peersMask.toCached()).toP3();
         // FIXME: Create a single precomp converter or fix generating single precompute
         GroupElement QPrecomp = new GroupElement(QExt.getCurve(), GroupElement.Representation.P3, QExt.getX(),
                 QExt.getY(), QExt.getZ(), QExt.getT(), true, true);
 
-        System.out.printf("QExt(%s): %s%n", myRole, Utils.bytesToHex(QExt.toByteArray()));
+        System.out.printf("QExt(%s): %s%n", mMyRole, Utils.bytesToHex(QExt.toByteArray()));
 
-        byte[] dhShared = QPrecomp.scalarMultiply(this.privateKey).toByteArray();
+        byte[] dhShared = QPrecomp.scalarMultiply(mPrivateKey).toByteArray();
 
-        System.out.printf("DH(%s): %s%n", myRole, Utils.bytesToHex(dhShared));
+        System.out.printf("DH(%s): %s%n", mMyRole, Utils.bytesToHex(dhShared));
 
         MessageDigest sha;
         try {
@@ -468,22 +469,22 @@ public class Spake2Context implements Destroyable {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("SHA-512 algorithm is not supported.");
         }
-        if (this.myRole == Spake2Role.Alice) {
-            updateWithLengthPrefix(sha, this.myName, this.myName.length);
-            updateWithLengthPrefix(sha, this.theirName, this.theirName.length);
-            updateWithLengthPrefix(sha, this.myMsg, this.myMsg.length);
+        if (mMyRole == Spake2Role.Alice) {
+            updateWithLengthPrefix(sha, mMyName, mMyName.length);
+            updateWithLengthPrefix(sha, mTheirName, mTheirName.length);
+            updateWithLengthPrefix(sha, mMyMsg, mMyMsg.length);
             updateWithLengthPrefix(sha, theirMsg, 32);
         } else { // Bob
-            updateWithLengthPrefix(sha, this.theirName, this.theirName.length);
-            updateWithLengthPrefix(sha, this.myName, this.myName.length);
+            updateWithLengthPrefix(sha, mTheirName, mTheirName.length);
+            updateWithLengthPrefix(sha, mMyName, mMyName.length);
             updateWithLengthPrefix(sha, theirMsg, 32);
-            updateWithLengthPrefix(sha, this.myMsg, this.myMsg.length);
+            updateWithLengthPrefix(sha, mMyMsg, mMyMsg.length);
         }
         updateWithLengthPrefix(sha, dhShared, dhShared.length);
-        updateWithLengthPrefix(sha, this.passwordHash, this.passwordHash.length);
+        updateWithLengthPrefix(sha, mPasswordHash, mPasswordHash.length);
 
         byte[] key = sha.digest();
-        this.state = State.KeyGenerated;
+        this.mState = State.KeyGenerated;
 
         return key.clone();
     }
@@ -493,7 +494,7 @@ public class Spake2Context implements Destroyable {
      *
      * @param n 32 bytes value
      */
-    private static void leftShift3(byte[] n) {
+    static void leftShift3(byte[] n) {
         int carry = 0;
         for (int i = 0; i < 32; i++) {
             int next_carry = (byte) ((n[i] & 0xFF) >>> 5);
@@ -522,7 +523,7 @@ public class Spake2Context implements Destroyable {
         sha.update(data);
     }
 
-    private GroupElement geScalarMultiplySmallPrecomp(Curve curve,
+    private static GroupElement geScalarMultiplySmallPrecomp(Curve curve,
                                                       final byte[] a /* 32 bytes */,
                                                       final GroupElement[] precompTable) {
         GroupElement h = curve.getZero(GroupElement.Representation.P3);
@@ -562,7 +563,7 @@ public class Spake2Context implements Destroyable {
      * @param b 32 bit value
      * @return 0xff...f if a == b and 0x0 otherwise.
      */
-    private static long isEqual(long a, long b) {
+    static long isEqual(int a, int b) {
         return isZero(a ^ b);
     }
 
@@ -590,40 +591,40 @@ public class Spake2Context implements Destroyable {
     }
 
     static class Scalar {
-        private final byte[] bytes;
+        private final byte[] mBytes;
 
         public Scalar(byte[] bytes) {
-            this.bytes = new byte[32];
-            System.arraycopy(bytes, 0, this.bytes, 0, 32);
+            mBytes = new byte[32];
+            System.arraycopy(bytes, 0, mBytes, 0, mBytes.length);
         }
 
         public Scalar() {
-            this.bytes = new byte[32];
+            mBytes = new byte[32];
         }
 
         public byte getByte(int idx) {
-            return bytes[idx];
+            return mBytes[idx];
         }
 
         public byte[] getBytes() {
-            return bytes;
+            return mBytes;
         }
 
         public void reset() {
-            Arrays.fill(this.bytes, (byte) 0);
+            Arrays.fill(mBytes, (byte) 0);
         }
 
         /**
          * Copy bytes from the given scalar
          */
         public void copy(Scalar scalar) {
-            System.arraycopy(scalar.bytes, 0, this.bytes, 0, 32);
+            System.arraycopy(scalar.mBytes, 0, mBytes, 0, mBytes.length);
         }
 
         /**
-         * @return A new scalar with bits copied from this if the mask is all ones.
+         * Scalar with bits copied from src if the mask is all ones.
          */
-        public Scalar cmov(Scalar src, long mask) {
+        public void cmov(Scalar src, long mask) {
             byte[] m = new byte[4];
             m[0] = (byte) mask;
             m[1] = (byte) (mask >>> 8);
@@ -633,38 +634,34 @@ public class Spake2Context implements Destroyable {
             for (int i = 0; i < 8; ++i) {
                 int idx = i * 4;
                 for (int j = 0; j < 4; ++j) {
-                    bytes[idx + j] = (byte) (m[j] & this.bytes[idx + j] | (~m[j] & src.bytes[idx + j]));
+                    mBytes[idx + j] = (byte) (m[j] & src.mBytes[idx + j] | (~m[j] & mBytes[idx + j]));
                 }
             }
-            return new Scalar(bytes);
         }
 
         /**
-         * @return 2 * this
+         * 2 * this
          */
-        Scalar dbl() {
-            byte[] bytes = new byte[32];
+        void dbl() {
             int carry = 0;
             for (int i = 0; i < 32; ++i) {
-                int carry_out = (this.bytes[i] & 0xFF) >>> 7;
-                bytes[i] = (byte) ((this.bytes[i] << 1) | carry);
+                int carry_out = (mBytes[i] & 0xFF) >>> 7;
+                mBytes[i] = (byte) ((mBytes[i] << 1) | carry);
                 carry = carry_out;
             }
-            return new Scalar(bytes);
         }
 
         /**
-         * @return src + this
+         * this + src
          */
-        Scalar add(Scalar src) {
+        void add(Scalar src) {
             byte[] bytes = new byte[32];
             int carry = 0;
             for (int i = 0; i < 32; ++i) {
-                int tmp = (src.bytes[i] & 0xFF) + (this.bytes[i] & 0xFF) + carry;
-                bytes[i] = (byte) tmp;
+                int tmp = (mBytes[i] & 0xFF) + (src.mBytes[i] & 0xFF) + carry;
+                mBytes[i] = (byte) tmp;
                 carry = tmp >>> 8;
             }
-            return new Scalar(bytes);
         }
     }
 }

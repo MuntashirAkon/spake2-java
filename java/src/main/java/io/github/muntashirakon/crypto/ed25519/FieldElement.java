@@ -25,13 +25,13 @@ public abstract class FieldElement implements Serializable {
      * @return the $(b-1)$-bit encoding of this FieldElement.
      */
     public byte[] toByteArray() {
-        return f.getEncoding().encode(this);
+        return Ed25519LittleEndianEncoding.encode(this);
     }
 
     public abstract boolean isNonZero();
 
     public boolean isNegative() {
-        return f.getEncoding().isNegative(this);
+        return Ed25519LittleEndianEncoding.isNegative(this);
     }
 
     public abstract FieldElement add(FieldElement val);

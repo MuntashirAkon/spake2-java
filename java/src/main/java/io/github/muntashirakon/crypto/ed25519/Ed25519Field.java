@@ -38,13 +38,9 @@ public class Ed25519Field implements Serializable {
      * (q-5) / 8
      */
     private final FieldElement qm5d8;
-    private final Ed25519LittleEndianEncoding enc;
 
-    public Ed25519Field(int b, byte[] q, Ed25519LittleEndianEncoding enc) {
+    public Ed25519Field(int b, byte[] q) {
         this.b = b;
-        this.enc = enc;
-        this.enc.setField(this);
-
         this.q = fromByteArray(q);
 
         // Set up constants
@@ -61,7 +57,7 @@ public class Ed25519Field implements Serializable {
     }
 
     public FieldElement fromByteArray(byte[] x) {
-        return enc.decode(x);
+        return Ed25519LittleEndianEncoding.decode(this, x);
     }
 
     public int getb() {
@@ -78,10 +74,6 @@ public class Ed25519Field implements Serializable {
 
     public FieldElement getQm5d8() {
         return qm5d8;
-    }
-
-    public Ed25519LittleEndianEncoding getEncoding(){
-        return enc;
     }
 
     @Override

@@ -11,15 +11,7 @@ package io.github.muntashirakon.crypto.ed25519;
  * <p>
  * Reviewed/commented by Bloody Rookie (nemproject@gmx.de)
  */
-public class Ed25519LittleEndianEncoding {
-    protected Ed25519Field f;
-
-    public synchronized void setField(Ed25519Field f) {
-        if (this.f != null)
-            throw new IllegalStateException("already set");
-        this.f = f;
-    }
-
+public final class Ed25519LittleEndianEncoding {
     /**
      * Encodes a given field element in its 32 byte representation. This is done in two steps:
      * <ol>
@@ -76,7 +68,7 @@ public class Ed25519LittleEndianEncoding {
      * <p>
      * Inserting the expression for $x$ into $(1)$ we get the desired expression for $q$.
      */
-    public byte[] encode(FieldElement x) {
+    public static byte[] encode(FieldElement x) {
         int[] h = ((Ed25519FieldElement)x).t;
         int h0 = h[0];
         int h1 = h[1];
@@ -187,7 +179,7 @@ public class Ed25519LittleEndianEncoding {
      * @param in The 32 byte representation.
      * @return The field element in its $2^{25.5}$ bit representation.
      */
-    public FieldElement decode(byte[] in) {
+    public static FieldElement decode(Ed25519Field f, byte[] in) {
         long h0 = load_4(in, 0);
         long h1 = load_3(in, 4) << 6;
         long h2 = load_3(in, 7) << 5;
@@ -249,7 +241,7 @@ public class Ed25519LittleEndianEncoding {
      *
      * @return true if $x$ is in $\{1,3,5,\dots,q-2\}$, false otherwise.
      */
-    public boolean isNegative(FieldElement x) {
+    public static boolean isNegative(FieldElement x) {
         byte[] s = encode(x);
         return (s[0] & 1) != 0;
     }
