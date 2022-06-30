@@ -27,24 +27,22 @@ public class Spake2ContextTest {
     @Test
     public void oldAlice() {
         for (int i = 0; i < 20; i++) {
+            System.out.println("========");
             SPAKE2Run spake2 = new SPAKE2Run();
             spake2.aliceDisablePasswordScalarHack = true;
             assertTrue(spake2.run());
-            if (!spake2.keyMatches()) {
-                System.out.printf("Iteration %d: Keys didn't match.\n", i);
-            }
+            assertTrue(spake2.keyMatches());
         }
     }
 
     @Test
     public void oldBob() {
         for (int i = 0; i < 20; i++) {
+            System.out.println("========");
             SPAKE2Run spake2 = new SPAKE2Run();
             spake2.bobDisablePasswordScalarHack = true;
             assertTrue(spake2.run());
-            if (!spake2.keyMatches()) {
-                System.out.printf("Iteration %d: Keys didn't match.\n", i);
-            }
+            assertTrue(spake2.keyMatches());
         }
     }
 
@@ -95,12 +93,13 @@ public class Spake2ContextTest {
                     bobNames.first.getBytes(StandardCharsets.UTF_8),
                     bobNames.second.getBytes(StandardCharsets.UTF_8));
 
-//            if (aliceDisablePasswordScalarHack) {
-//                alice.setDisablePasswordScalarHack(true);
-//            }
-//            if (bobDisablePasswordScalarHack) {
-//                bob.setDisablePasswordScalarHack(true);
-//            }
+            if (aliceDisablePasswordScalarHack) {
+                alice.setDisablePasswordScalarHack(true);
+            }
+
+            if (bobDisablePasswordScalarHack) {
+                bob.setDisablePasswordScalarHack(true);
+            }
 
             byte[] aliceMsg;
             byte[] bobMsg;
