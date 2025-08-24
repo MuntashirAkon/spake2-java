@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'io.github.muntashirakon'
-version = '2.1.0'
+version = '2.2.0'
 
 repositories {
     mavenCentral()
@@ -19,6 +19,7 @@ repositories {
 publishing {
     publications {
         maven(MavenPublication) {
+            artifactId = 'spake2-java'
             from components.java
 
             pom {

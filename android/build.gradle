@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'io.github.muntashirakon'
-version = '2.1.0'
+version = '2.2.0'
 
 android {
     namespace "io.github.muntashirakon.crypto.spake2"
@@ -48,7 +48,7 @@ android {
 publishing {
     publications {
         release(MavenPublication) {
-            artifactId = 'spake2'
+            artifactId = 'spake2-android'
             afterEvaluate {
                 from components.release
             }
