@@ -10,10 +10,7 @@ plugins {
 }
 
 group = 'io.github.muntashirakon'
-version = '0.9.0'
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+version = '0.9.1'
 
 repositories {
     mavenCentral()
@@ -40,6 +37,9 @@ publishing {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
     withJavadocJar()
     withSourcesJar()
 }

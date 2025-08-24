@@ -9,13 +9,17 @@ plugins {
     id 'maven-publish'
 }
 
+group = 'io.github.muntashirakon'
+version = '0.9.1'
+
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    namespace "io.github.muntashirakon.crypto.spake2"
+    compileSdkVersion 35
+    buildToolsVersion "35.0.0"
 
     defaultConfig {
         minSdkVersion 1
-        targetSdkVersion 31
+        targetSdkVersion 35
     }
 
     buildTypes {
@@ -32,12 +36,20 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            artifactId = 'spake2'
+            afterEvaluate {
                 from components.release
             }
         }
@@ -45,7 +57,7 @@ afterEvaluate {
 }
 
 dependencies {
-    implementation "androidx.annotation:annotation:1.4.0"
+    implementation "androidx.annotation:annotation:1.9.1"
 
     testImplementation 'junit:junit:4.13.2'
 //    testImplementation 'org.robolectric:robolectric:4.6.1'
