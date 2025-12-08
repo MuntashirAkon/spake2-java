@@ -25,6 +25,11 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            externalNativeBuild {
+                cmake {
+                    cppFlags "-Wl,-z,max-page-size=16384"
+                }
+            }
         }
     }
     externalNativeBuild {
@@ -40,6 +45,11 @@ android {
         singleVariant("release") {
             withSourcesJar()
             withJavadocJar()
+        }
+    }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
         }
     }
 }
