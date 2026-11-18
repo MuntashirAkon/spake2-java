@@ -98,7 +98,7 @@ public class Curve implements Serializable {
         }
 
         int isNegative = X.isNegative() ? 1 : 0;
-        if (isNegative != (s[31] >>> 7)) {
+        if (isNegative != ((s[31]&0xff) >>> 7)) {
             X = X.negate(); // x = -iuv^3(uv^7)^((q-5)/8)
         }
 

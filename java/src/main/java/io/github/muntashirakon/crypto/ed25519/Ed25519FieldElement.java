@@ -167,7 +167,10 @@ public class Ed25519FieldElement extends FieldElement {
      * @return The (reasonably reduced) field element this * val.
      */
     public FieldElement multiply(FieldElement val) {
-        int[] g = ((Ed25519FieldElement)val).t;
+        int[] __t = ((Ed25519FieldElement)val).t;
+        long[] g = new long[__t.length];
+        for(int i=0; i< g.length; i++)
+        	g[i] = __t[i];
         long x1;
         long x2;
         long x3;
@@ -495,29 +498,29 @@ public class Ed25519FieldElement extends FieldElement {
      * @return The (reasonably reduced) square of this field element.
      */
     public FieldElement square() {
-        int f0 = t[0];
-        int f1 = t[1];
-        int f2 = t[2];
-        int f3 = t[3];
-        int f4 = t[4];
-        int f5 = t[5];
-        int f6 = t[6];
-        int f7 = t[7];
-        int f8 = t[8];
-        int f9 = t[9];
-        int f0_2 = 2 * f0;
-        int f1_2 = 2 * f1;
-        int f2_2 = 2 * f2;
-        int f3_2 = 2 * f3;
-        int f4_2 = 2 * f4;
-        int f5_2 = 2 * f5;
-        int f6_2 = 2 * f6;
-        int f7_2 = 2 * f7;
-        int f5_38 = 38 * f5; /* 1.959375*2^30 */
-        int f6_19 = 19 * f6; /* 1.959375*2^30 */
-        int f7_38 = 38 * f7; /* 1.959375*2^30 */
-        int f8_19 = 19 * f8; /* 1.959375*2^30 */
-        int f9_38 = 38 * f9; /* 1.959375*2^30 */
+        long f0 = t[0];
+        long f1 = t[1];
+        long f2 = t[2];
+        long f3 = t[3];
+        long f4 = t[4];
+        long f5 = t[5];
+        long f6 = t[6];
+        long f7 = t[7];
+        long f8 = t[8];
+        long f9 = t[9];
+        long f0_2 = 2 * f0;
+        long f1_2 = 2 * f1;
+        long f2_2 = 2 * f2;
+        long f3_2 = 2 * f3;
+        long f4_2 = 2 * f4;
+        long f5_2 = 2 * f5;
+        long f6_2 = 2 * f6;
+        long f7_2 = 2 * f7;
+        long f5_38 = 38 * f5; /* 1.959375*2^30 */
+        long f6_19 = 19 * f6; /* 1.959375*2^30 */
+        long f7_38 = 38 * f7; /* 1.959375*2^30 */
+        long f8_19 = 19 * f8; /* 1.959375*2^30 */
+        long f9_38 = 38 * f9; /* 1.959375*2^30 */
         long f0f0    = f0   * (long) f0;
         long f0f1_2  = f0_2 * (long) f1;
         long f0f2_2  = f0_2 * (long) f2;
