@@ -167,7 +167,10 @@ public class Ed25519FieldElement extends FieldElement {
      * @return The (reasonably reduced) field element this * val.
      */
     public FieldElement multiply(FieldElement val) {
-        int[] g = ((Ed25519FieldElement)val).t;
+        int[] __t = ((Ed25519FieldElement)val).t;
+        long[] g = new long[__t.length];
+        for(int i=0; i< g.length; i++)
+        	g[i] = __t[i];
         long x1;
         long x2;
         long x3;
